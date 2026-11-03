@@ -68,3 +68,18 @@ subprojects {
 }
 
 eclipse.project.name = 'SevenDemiurges' + '-parent'
+
+project(':lwjgl3') {
+  tasks.register("runEditor", JavaExec) {
+    group = "application"
+    description = "Lance l'éditeur de cartes (Helper)"
+
+    mainClass = 'com.onyxleroy.sevendemiurges.lwjgl3.MapEditorLauncher'
+
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+
+    workingDir = project.file('../assets')
+    ignoreExitValue = true
+  }
+}
