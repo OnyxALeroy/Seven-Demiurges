@@ -7,14 +7,17 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
+import com.onyxleroy.sevendemiurges.data.MapData;
+import com.onyxleroy.sevendemiurges.world.editor.MapDataLoader;
+import com.onyxleroy.sevendemiurges.world.editor.MapDataSaver;
 import com.onyxleroy.sevendemiurges.world.editor.TilesetsManager;
 
 public class EditorScreen implements Screen {
@@ -22,7 +25,10 @@ public class EditorScreen implements Screen {
     private Skin skin;
     private Table tileGrid;
     private TilesetsManager tilesetsManager;
+
     private int selectedTileId = 0;
+    private String currentName = "";
+    private MapData mapData = new MapData();
 
     @Override
     public void show() {
@@ -38,8 +44,33 @@ public class EditorScreen implements Screen {
         Table topBanner = new Table();
         topBanner.setBackground(createColorDrawable(new Color(0.2f, 0.2f, 0.2f, 1)));
 
-        TextButton btnLoad = new TextButton("Tileset Suivant", skin);
-        topBanner.add(btnLoad).pad(10);
+        TextButton btnTilesetLoad = new TextButton("Tileset Suivant", skin);
+        topBanner.add(btnTilesetLoad).pad(10);
+
+        // Load map
+        TextButton btnMapLoad = new TextButton("Load Map", skin);
+        topBanner.add(btnMapLoad).pad(10);
+        btnMapLoad.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                MapDataLoader.openLoadDialog(stage, skin, (MapData loadedMap) -> {
+                    mapData = loadedMap;
+                });
+            }
+        });
+
+        // Save map
+        TextButton btnMapSave = new TextButton("Save Map", skin);
+        topBanner.add(btnMapSave).pad(10);
+        btnMapSave.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                MapDataSaver.openSaveDialog(stage, skin, mapData, currentName, (String nomSaisi) -> {
+                    currentName = nomSaisi;
+                    System.out.println("Le nom récupéré est : " + nomSaisi);
+                });
+            }
+        });
 
         // --- BANDEAU GAUCHE ---
         Table leftSidebar = new Table();
@@ -54,7 +85,7 @@ public class EditorScreen implements Screen {
         stage.addActor(rootTable);
 
         // --- LOGIQUE DE CHARGEMENT ---
-        tilesetsManager = new TilesetsManager(this, btnLoad);
+        tilesetsManager = new TilesetsManager(this, btnTilesetLoad);
     }
 
     @Override
@@ -80,7 +111,7 @@ public class EditorScreen implements Screen {
         tilesetsManager.dispose();
     }
 
-    // --- HELPERS GRAPHIQUES ---
+    // --------------------------------------------------------------------------------------------
 
     private TextureRegionDrawable createColorDrawable(Color color) {
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -101,6 +132,27 @@ public class EditorScreen implements Screen {
         btnStyle.font = skin.getFont("default");
 
         skin.add("default", btnStyle);
+
+        // Style pour les textes simples (Labels)
+        Label.LabelStyle labelStyle = new Label.LabelStyle();
+        labelStyle.font = skin.getFont("default");
+        labelStyle.fontColor = Color.WHITE;
+        skin.add("default", labelStyle);
+
+        // Style pour le champ texte (TextField)
+        TextField.TextFieldStyle tfStyle = new TextField.TextFieldStyle();
+        tfStyle.font = skin.getFont("default");
+        tfStyle.fontColor = Color.WHITE;
+        tfStyle.background = createColorDrawable(new Color(0.15f, 0.15f, 0.15f, 1));
+        tfStyle.cursor = createColorDrawable(Color.WHITE); // Le curseur clignotant
+        tfStyle.selection = createColorDrawable(Color.ROYAL); // La couleur quand on surligne le texte
+        skin.add("default", tfStyle);
+
+        // Style pour la fenêtre pop-up (Dialog)
+        Window.WindowStyle winStyle = new Window.WindowStyle();
+        winStyle.titleFont = skin.getFont("default");
+        winStyle.background = createColorDrawable(new Color(0.2f, 0.2f, 0.25f, 0.95f)); // Fond semi-transparent
+        skin.add("default", winStyle);
     }
 
     // --------------------------------------------------------------------------------------------
