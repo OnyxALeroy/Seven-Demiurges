@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.onyxleroy.sevendemiurges.world.Tileset;
+import com.onyxleroy.sevendemiurges.world.TilesetManager;
 import com.onyxleroy.sevendemiurges.world.editor.screen.EditorScreen;
 
 public class TilesetsManager {
@@ -19,9 +20,11 @@ public class TilesetsManager {
     private int tilesetIndex = 0;
 
     private final EditorScreen editorScreen;
+    private final TilesetManager tilesetManager;
 
-    public TilesetsManager(EditorScreen editorScreen, TextButton btnLoad) {
+    public TilesetsManager(EditorScreen editorScreen, TextButton btnLoad, TilesetManager tilesetManager) {
         this.editorScreen = editorScreen;
+        this.tilesetManager = tilesetManager;
         availableTilesets = Gdx.files.internal(tilesetsPath).list(tilesetsExtension);
 
         btnLoad.addListener(new ClickListener() {
@@ -44,12 +47,11 @@ public class TilesetsManager {
     }
 
     private void loadTilesetToSidebar(FileHandle fileHandle) {
-        // Nettoyage de l'ancien tileset s'il existe
-        if (currentTileset != null) currentTileset.dispose();
         editorScreen.getTileGrid().clearChildren();
 
-        // Chargement du nouveau via notre classe existante
-        currentTileset = new Tileset(fileHandle.path());
+        // Chargement du nouveau via le manager partagé (cache + cycle de vie)
+        currentTileset = tilesetManager.get(fileHandle.path());
+        editorScreen.getMapDrawManager().setTilesetPath(fileHandle.path());
         TextureRegion[] tiles = currentTileset.getTiles();
 
         // Création de la grille d'images
@@ -72,9 +74,5 @@ public class TilesetsManager {
                 editorScreen.getTileGrid().row();
             }
         }
-    }
-
-    public void dispose() {
-        if (currentTileset != null) currentTileset.dispose();
     }
 }

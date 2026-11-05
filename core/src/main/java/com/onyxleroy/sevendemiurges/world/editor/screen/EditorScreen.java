@@ -17,7 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-import com.onyxleroy.sevendemiurges.data.MapData;
+import com.onyxleroy.sevendemiurges.world.TilesetManager;
 import com.onyxleroy.sevendemiurges.world.editor.MapDataLoader;
 import com.onyxleroy.sevendemiurges.world.editor.MapDataSaver;
 import com.onyxleroy.sevendemiurges.world.editor.TilesetsManager;
@@ -33,7 +33,8 @@ public class EditorScreen implements Screen {
 
     private int selectedTileId = 0;
     private String currentName = "";
-    private final MapDrawManager mapDrawManager = new MapDrawManager();
+    private final TilesetManager tilesetManager = new TilesetManager();
+    private final MapDrawManager mapDrawManager = new MapDrawManager(this, tilesetManager);
 
     @Override
     public void show() {
@@ -62,9 +63,7 @@ public class EditorScreen implements Screen {
         btnMapLoad.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                MapDataLoader.openLoadDialog(stage, skin, (MapData loadedMap) -> {
-                    mapDrawManager.setMapData(loadedMap);
-                });
+                MapDataLoader.openLoadDialog(stage, skin, mapDrawManager::setMapData);
             }
         });
 
@@ -95,7 +94,7 @@ public class EditorScreen implements Screen {
         stage.addActor(rootTable);
 
         // --- LOGIQUE DE CHARGEMENT ---
-        tilesetsManager = new TilesetsManager(this, btnTilesetLoad);
+        tilesetsManager = new TilesetsManager(this, btnTilesetLoad, tilesetManager);
     }
 
     @Override
@@ -103,6 +102,7 @@ public class EditorScreen implements Screen {
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1);
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
+        mapDrawManager.renderMap(batch);
         batch.end();
         stage.act(delta);
         stage.draw();
@@ -130,7 +130,7 @@ public class EditorScreen implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
-        tilesetsManager.dispose();
+        tilesetManager.dispose();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -270,5 +270,9 @@ public class EditorScreen implements Screen {
 
     public Table getTileGrid() {
         return tileGrid;
+    }
+
+    public MapDrawManager getMapDrawManager() {
+        return mapDrawManager;
     }
 }

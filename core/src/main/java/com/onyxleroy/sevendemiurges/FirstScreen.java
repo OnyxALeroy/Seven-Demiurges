@@ -6,12 +6,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
-import com.onyxleroy.sevendemiurges.world.MapLayer;
+import com.onyxleroy.sevendemiurges.data.MapData;
 import com.onyxleroy.sevendemiurges.world.MapLayerType;
-import com.onyxleroy.sevendemiurges.world.Tileset;
+import com.onyxleroy.sevendemiurges.world.TilesetManager;
 import com.onyxleroy.sevendemiurges.world.WorldMap;
-
-import java.util.EnumMap;
 
 /** First screen of the application. Displayed after the application is created. */
 public class FirstScreen implements Screen {
@@ -20,30 +18,35 @@ public class FirstScreen implements Screen {
     private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer mapRenderer;
 
-    private Tileset mainTileset;
+    private final TilesetManager tilesetManager = new TilesetManager();
     private WorldMap worldMap;
+
+    private static final int[][] DEFAULT_BACKGROUND = {
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 1, 0, 0, 0, 0, 1},
+        {1, 0, 0, 1, 1, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+    };
 
     @Override
     public void show() {
         batch = new SpriteBatch();
 
-        // 1. On initialise notre nouvel importateur
-        mainTileset = new Tileset("tileset.png");
+        MapData mapData = new MapData();
+        mapData.tilesetPath = "tilesets/red.png";
+        mapData.layers.put(MapLayerType.BACKGROUND, DEFAULT_BACKGROUND);
 
-        // 2. On passe directement les tuiles découpées au layer
-        MapLayer backgroundLayer = new MapLayer(mainTileset.getTiles());
-
-        // 3. On construit la carte
-        EnumMap<MapLayerType, MapLayer> layers = new EnumMap<>(MapLayerType.class);
-        layers.put(MapLayerType.BACKGROUND, backgroundLayer);
-        worldMap = new WorldMap(layers);
+        worldMap = new WorldMap(tilesetManager);
+        worldMap.setData(mapData);
     }
 
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
         batch.begin();
-        worldMap.render(batch);
+        worldMap.render(batch, 0.0f , 0.0f);
         batch.end();
     }
 
@@ -72,7 +75,7 @@ public class FirstScreen implements Screen {
     @Override
     public void dispose() {
         if (tiledMap != null) tiledMap.dispose();
-        if (mainTileset != null) mainTileset.dispose();
+        tilesetManager.dispose();
         if (mapRenderer != null) mapRenderer.dispose();
     }
 }

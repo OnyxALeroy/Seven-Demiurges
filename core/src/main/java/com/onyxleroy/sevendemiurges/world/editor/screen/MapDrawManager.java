@@ -1,14 +1,41 @@
 package com.onyxleroy.sevendemiurges.world.editor.screen;
 
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.onyxleroy.sevendemiurges.data.MapData;
+import com.onyxleroy.sevendemiurges.world.TilesetManager;
+import com.onyxleroy.sevendemiurges.world.WorldMap;
 
 public class MapDrawManager {
+    private final EditorScreen screen;
     private MapData mapData = new MapData();
+    private final WorldMap worldMap;
+
+    private float xMapTopLeft = 0.0f;
+    private float yMapTopLeft = 0.0f;
+
+    public MapDrawManager(EditorScreen editorScreen, TilesetManager tilesetManager) {
+        screen = editorScreen;
+        worldMap = new WorldMap(tilesetManager);
+    }
 
     public MapData getMapData() { return mapData; }
 
-    public void setMapData(MapData newMap) { mapData = newMap; }
+    public void setMapData(MapData newMap) {
+        mapData = newMap;
+        worldMap.setData(mapData);
+    }
+
+    public void setTilesetPath(String path) {
+        mapData.tilesetPath = path;
+        worldMap.setData(mapData);
+    }
+
+    // --------------------------------------------------------------------------------------------
+
+    public void renderMap(SpriteBatch batch) {
+        worldMap.render(batch, xMapTopLeft, yMapTopLeft);
+    }
 
     // --------------------------------------------------------------------------------------------
 
@@ -20,7 +47,8 @@ public class MapDrawManager {
             // Logique pour effacer la zone (mettre la tuile à -1 ou "vide")
         }
         else if (button == Input.Buttons.MIDDLE) {
-            return;
+            xMapTopLeft += (endX - startX);
+            yMapTopLeft += (endY - startY);
         }
     }
 }
