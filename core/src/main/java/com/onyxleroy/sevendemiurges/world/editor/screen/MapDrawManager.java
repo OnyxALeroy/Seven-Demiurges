@@ -11,9 +11,6 @@ public class MapDrawManager {
     private MapData mapData = new MapData();
     private final WorldMap worldMap;
 
-    private float xMapTopLeft = 0.0f;
-    private float yMapTopLeft = 0.0f;
-
     public MapDrawManager(EditorScreen editorScreen, TilesetManager tilesetManager) {
         screen = editorScreen;
         worldMap = new WorldMap(tilesetManager);
@@ -34,7 +31,7 @@ public class MapDrawManager {
     // --------------------------------------------------------------------------------------------
 
     public void renderMap(SpriteBatch batch) {
-        worldMap.render(batch, xMapTopLeft, yMapTopLeft);
+        worldMap.render(batch, 0f, 0f);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -45,10 +42,6 @@ public class MapDrawManager {
         }
         else if (button == Input.Buttons.RIGHT) {
             // Logique pour effacer la zone (mettre la tuile à -1 ou "vide")
-        }
-        else if (button == Input.Buttons.MIDDLE) {
-            xMapTopLeft += (endX - startX);
-            yMapTopLeft += (endY - startY);
         }
     }
 }

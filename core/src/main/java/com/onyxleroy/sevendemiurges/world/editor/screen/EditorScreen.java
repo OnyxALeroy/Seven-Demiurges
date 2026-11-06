@@ -111,7 +111,11 @@ public class EditorScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
+        if (width <= 0 || height <= 0) return;
         stage.getViewport().update(width, height, true);
+        camera.viewportWidth = width;
+        camera.viewportHeight = height;
+        camera.update();
     }
 
     @Override
